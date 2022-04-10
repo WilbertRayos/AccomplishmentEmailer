@@ -37,7 +37,7 @@ class Main:
 
     @staticmethod
     def is_friday():
-        if date.today().weekday() == 5:
+        if date.today().weekday() == 4:
             return True
         return False
 
@@ -47,17 +47,27 @@ class Main:
 
 
 class Filer:
+
     def file_reading(self):
         with open("accomplishment.txt", "r") as f:
             accomp = f.readlines()
             return accomp
 
+    def file_encode_submitted(self, d_submitted):
+        with open("submission.txt", "a") as f:
+            date_submitted = d_submitted
+            f.write(f"\n{date_submitted}")
+
+    def file_fetch_last_submission(self):
+        with open("submission.txt", "r") as f:
+            last_submission = f.readlines()[-1]
+            return last_submission
 
 class Messager(Main, Filer):
-    USERNAME = "sender_email_address"
-    PASSWORD = "sender_email_password"
-    TO = "receiver_email"
-    CC = ["receiver2_email", "receiver3_email"]
+    USERNAME = ""
+    PASSWORD = ""
+    TO = ""
+    CC = [""]
 
     def __init__(self):
         super(Messager, self).__init__()
@@ -89,9 +99,11 @@ class Messager(Main, Filer):
         return self.msg.set_content(body)
 
     def send_message(self):
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-            smtp.login(self.USERNAME, self.PASSWORD)
-            smtp.send_message(self.msg)
+        if self.file_fetch_last_submission() != str(self.curr_date).strip():
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+                smtp.login(self.USERNAME, self.PASSWORD)
+                smtp.send_message(self.msg)
+                self.file_encode_submitted(self.curr_date)
 
 
 if __name__ == "__main__":
